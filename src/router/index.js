@@ -1,80 +1,135 @@
-import {createRouter, createWebHashHistory} from "vue-router";
-// import {showLoadingToast} from "vant";
-import usePeerStore from "@/store/peer";
-let router = createRouter({
-    history: createWebHashHistory(process.env.BASE_URL),
-    routes: [
-        {
-            path: "/",
-            component: () => import("@/views/MainEntranceView.vue"),
-            children: [
-                {
-                    path: "/",
-                    redirect: "/friends-list-view",
-                    meta: {
-                        requestAuth: true,
-                    }
-                },
-                {
-                    path: "friends-list-view",
-                    component: () => import("@/views/FriendsListView.vue"),
-                    meta: {
-                        requestAuth: true,
-                    }
-                },
-                {
-                    path: "setting-view",
-                    component: () => import("@/views/SettingsView.vue"),
-                    meta: {
-                        requestAuth: true,
-                    }
-                }
-            ]
-        },
-        {
-            path: "/video-call-calling-view",
-            component: () => import("@/views/VideoCallCallingView.vue"),
-            meta: {
-                requestAuth: true,
-            }
-        },
-        {
-            path: "/video-call-answer-view",
-            component: () => import("@/views/VideoCallAnswerView.vue"),
-            meta: {
-                requestAuth: true,
-            }
-        },
-        {
-            path: "/login-view",
-            name: "login",
-            component: () => import("@/views/LoginView.vue"),
-            meta: {
-                requestAuth: false,
-            }
-        },
-        {
-            path: "/register-view",
-            name: "register",
-            component: () => import("@/views/RegisterView.vue"),
-            meta: {
-                requestAuth: false,
-            }
-        }
-    ]
-});
+import { createRouter, createWebHistory } from 'vue-router'
+import PkIndexView from '../views/pk/PkIndexView'
+import RecordIndexView from '../views/record/RecordIndexView'
+import RecordContentView from '../views/record/RecordContentView'
+import RanklistIndexView from '../views/ranklist/RanklistIndexView'
+import NotFound from '../views/error/NotFound'
+import UserAccountLoginView from '../views/user/account/UserAccountLoginView'
+import UserAccountRegisterView from '../views/user/account/UserAccountRegisterView'
+import IndexView from '../views/index/IndexView'
+import store from '../store/index'
+import DynamicView from '../views/dynamic/DynamicView'
+import MyspaceView from '../views/user/myspace/MyspaceView'
+import PostView from '../views/user/myspace/PostView'
+import BotView from '../views/user/myspace/BotView'
 
-router.beforeEach((to, from, next) => {
-    const peerStore = usePeerStore();
-    if (to.meta.requestAuth && !peerStore.is_login) {
-        next({name: "login"});
-    } else {
-        next();
+const routes = [
+  {
+    path: "/",
+    name: "home",
+    component: IndexView,
+    meta: {
+      requestAuth: false,
     }
+  },
+  {
+    path: "/pk/",
+    name: "pk_index",
+    component: PkIndexView,
+    meta: {
+      requestAuth: true,
+    }
+  },
+  {
+    path: "/record/",
+    name: "record_index",
+    component: RecordIndexView,
+    meta: {
+      requestAuth: true,
+    }
+  },
+  
+  {
+    path: "/record/:recordId/",
+    name: "record_content",
+    component: RecordContentView,
+    meta: {
+      requestAuth: true,
+    }
+  },
+  {
+    path: "/dynamics/",
+    name: "dynamics_index",
+    component: DynamicView,
+    meta: {
+      requestAuth: false,
+    }
+  },
+  {
+    path: "/myspace/",
+    component: MyspaceView,
+    children: [
+      {
+        path: 'index/',
+        name: "myspace_index",
+        component: PostView
+      },
+      {
+        path: 'posts/',   
+        // 默认是post显示
+        name: "myspace_posts",
+        component: PostView
+      },
+      {
+        path: 'bots/',
+        name: "myspace_bots",
+        component: BotView
+      },
+    ],
+    meta: {
+      requestAuth: true,
+    }
+  },
+  {
+    path: "/ranklist/",
+    name: "ranklist_index",
+    component: RanklistIndexView,
+    meta: {
+      requestAuth: true,
+    }
+  },
+
+  {
+    path: "/user/account/login/",
+    name: "user_account_login",
+    component: UserAccountLoginView,
+    meta: {
+      requestAuth: false,
+    }
+  },
+  {
+    path: "/user/account/register/",
+    name: "user_account_register",
+    component: UserAccountRegisterView,
+    meta: {
+      requestAuth: false,
+    }
+  },
+  {
+    path: "/404/",
+    name: "404",
+    component: NotFound,
+    meta: {
+      requestAuth: false,
+    }
+  },
+  {
+    path: "/:catchAll(.*)",
+    redirect: "/404/"
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
 })
 
+router.beforeEach((to, from, next) => {
+  if (to.meta.requestAuth && !store.state.user.is_login) {
+    next({name: "user_account_login"});
+  } else {
+    next();
+  }
+})
 
-
-
-
-export default router;
+export default router

@@ -1,9 +1,24 @@
 <template>
-  <section>
-    <router-view v-slot="{ Component }">
-      <keep-alive include="MainEntrancePage">
-        <component :is="Component"/>
-      </keep-alive>
-    </router-view>
-  </section>
+  <NavBar />
+  <router-view></router-view>
 </template>
+
+<script>
+import NavBar from './components/navbar/NavBar.vue'
+import "bootstrap/dist/css/bootstrap.min.css"
+import "bootstrap/dist/js/bootstrap"
+
+export default {
+  components: {
+    NavBar
+  },
+  
+}
+</script>
+
+<style>
+body {
+  background-image: url("./assets/images/background.gif"); ;
+  background-size: cover;
+}
+</style>

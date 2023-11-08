@@ -2,9 +2,4 @@
 
 
 
-export const apiUrl = "http://47.120.45.91:8081"
-
-
-export const wsUrl = "47.120.45.91"
-
-
+export const apiUrl = "http://127.0.0.1:3000"

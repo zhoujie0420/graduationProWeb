@@ -3,14 +3,11 @@ import networkConfiguration from "@/network/configuration";
 import usePeerStore from "@/store/peer";
 import {showToast} from "vant";
 
-export default {
-    install(app) {
-        console.log("invoked initialization peer plugin");
-        app.config.globalProperties.$initializationPeer = new Promise(resolve => {
+export default function (username) {
             let peerStore = usePeerStore();
 
             let {host, port, path} = {...networkConfiguration.server.peerServer};
-            let localPeer = new Peer({host, port, path});
+            let localPeer = new Peer(username, {host, port, path});
 
             localPeer.on("connection", dataConnection => {
                 console.log("localPeer on connection", dataConnection);
@@ -72,8 +69,5 @@ export default {
             localPeer.on("open", localPeerId => {
                 console.log("localPeer opened,the local peer id is: ", localPeerId);
                 peerStore.localPeer = localPeer;
-                resolve();
             });
-        });
-    }
 }
