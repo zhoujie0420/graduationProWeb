@@ -3,34 +3,37 @@ import networkConfiguration from "@/network/configuration";
 import usePeerStore from "@/store/peer";
 import useFriendStore from "@/store/friend";
 import {showToast} from "vant";
-export function initializeWebSocketPlugin() {
-    return new Promise(resolve => {
-        let peerStore = usePeerStore();
-        let friendStore = useFriendStore();
 
-        let { host, port, path } = { ...networkConfiguration.server.webSocketServer };
+export default {
+    install(app) {
+        console.log("invoked initialization web socket plugin");
+        app.config.globalProperties.$initializationPeer?.then(() => {
+            let peerStore = usePeerStore();
+            let friendStore = useFriendStore();
 
-        let connection = new ReconnectingWebSocket(`ws://${host}:${port}${path}/${peerStore.localPeer.id}`);
+            let {host, port, path} = {...networkConfiguration.server.webSocketServer};
 
-        connection.onmessage = event => {
-            let message = JSON.parse(event.data);
-            friendStore.onlineList = message;
-            console.log("webSocketConnection.onmessage:", message);
-        };
+            let connection = new ReconnectingWebSocket(`ws://${host}:${port}${path}/${peerStore.localPeer.id}`);
 
-        connection.onclose = event => {
-            console.log("webSocketConnection.onclose:", event);
-            showToast("network connection closed");
-        };
+            connection.onmessage = event => {
+                let message = JSON.parse(event.data);
+                friendStore.onlineList = message;
+                console.log("webSocketConnection.onmessage:", message);
+            };
 
-        connection.onerror = event => {
-            console.log("webSocketConnection.onerror:", event);
-            showToast("network connection error");
-        };
+            connection.onclose = event => {
+                console.log("webSocketConnection.onclose:", event);
+                showToast("network connection closed");
+            };
 
-        connection.onopen = event => {
-            console.log("webSocketConnection.onopen:", event);
-            resolve();
-        };
-    });
-}
+            connection.onerror = event => {
+                console.log("webSocketConnection.onerror:", event);
+                showToast("network connection error");
+            };
+
+            connection.onopen = event => {
+                console.log("webSocketConnection.onopen:", event);
+            };
+        });
+    }
+};
