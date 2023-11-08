@@ -1,5 +1,5 @@
 <template>
-  <NavBar />
+  <NavBar/>
   <router-view></router-view>
 </template>
 
@@ -12,13 +12,13 @@ export default {
   components: {
     NavBar
   },
-  
+
 }
 </script>
 
 <style>
 body {
-  background-image: url("./assets/images/background.gif"); ;
+  background-color: #87CEFA;
   background-size: cover;
 }
 </style>

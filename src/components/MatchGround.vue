@@ -1,98 +1,53 @@
 <template>
     <div class="matchground">
       <div class="row">
-  
-          <!-- 自己 -->
-          <div class="col-4">
-              <div class="user-photo">
-                  <img :src="$store.state.user.photo" alt="">
-              </div>
-              <div class="user-username">
-                  {{$store.state.user.username}}
-              </div>
-          </div>
-          <!-- 选择Bot -->
-          <div class="col-4">
-                <div class="user-select-bot">
-                    <select v-model="select_bot" class="form-select" aria-label="Default select example">
-                        <option value="-1" selected>亲自出马</option>
-                        <option v-for="bot in bots" :key="bot.id" :value="bot.id">
-                            {{ bot.title }}
-                        </option>
-                    </select>
-                </div>
-            </div>
 
-          <!-- 对手 -->
-          <div class="col-4">
-              <div class="user-photo">
-                  <img :src="$store.state.pk.opponent_photo" alt="">
-              </div>
-              <div class="user-username">
-                  {{$store.state.pk.opponent_username}}
-              </div>
-          </div>
-  
-          <div class="col-12" style="text-align : center;  padding-top : 12vh;">
-              <button type="button" class="btn btn-warning btn-lg" @click="click_match_btn">{{match_btn_info}}</button>
-          </div>
-  
+        <section>
+          <van-nav-bar title="朋友"
+                       fixed
+                       placeholder
+                       safe-area-inset-top/>
+        </section>
+
+
+        <section v-if="friendStore.onlineList.length">
+          <van-divider>在线的朋友 轻触可开始视频聊天</van-divider>
+          {{$store.state.onlineList}}
+            <friend-card
+                         @click="jumpToVideoCallCallingView(store.state.username)">
+              {{ $store.state.user.username }}
+            </friend-card>
+          </section>
+
       </div>
     </div>
   </template>
   
-  <script>
-  import { ref } from "vue"
+  <script setup>
   import { useStore } from "vuex"
-  import $ from "jquery"
-  
-  export default {
-      setup(){
-          const store = useStore();
-          let match_btn_info = ref("开始匹配")
-          let bots = ref([])
-          let select_bot = ref(-1)
-  
-          const click_match_btn = ( )=>{
-              if(match_btn_info.value === "开始匹配"){
-                  match_btn_info.value = "取消";
-  
-                  //向后端发送信息
-                  store.state.pk.socket.send(JSON.stringify({
-                      event:"start-matching",
-                      bot_id: select_bot.value,
-                  }));
-              } else if(match_btn_info.value === "取消"){
-                  match_btn_info.value = "开始匹配";
-  
-                  store.state.pk.socket.send(JSON.stringify({
-                      event:"stop-matching",
-                  }));
-              }
+  import {showToast} from "vant";
+  import router from "@/router";
+
+  const store = useStore();
+
+
+  function jumpToVideoCallCallingView(calleePeerId) {
+    if (store.state.user.localPeer && store.state.user.localPeer.open) {
+      if (store.state.user.dataConnection) {
+        showToast("currently busy");
+      } else {
+        router.push({
+          path: "/video-call-calling-view",
+          query: {
+            calleePeerId
           }
-  
-          const refresh_bots = () => {
-              $.ajax({
-                  url: "http://127.0.0.1:3000/api/user/bot/getlist/",
-                  type: "get",
-                  headers: {
-                      'Authorization': "Bearer " + store.state.user.token,
-                  },
-                  success(resp) {
-                      bots.value = resp;
-                  }
-              })
-          };
-          refresh_bots();
-  
-          return {
-              match_btn_info,
-              click_match_btn,
-              bots,
-              select_bot,
-          }
+        });
       }
+    } else {
+      showToast("local peer not opened");
+    }
   }
+
   </script>
   
   <style scoped>
